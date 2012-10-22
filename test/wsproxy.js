@@ -1,10 +1,10 @@
+/*jshint asi:true, node: true*/
 var WebSocket = require('faye-websocket'),
   http = require('http'),
   fs = require('fs'),
   server = http.createServer(),
   messages = [],
   clients = [],
-  hasErr = false,
   host
 
 // listening to socket
@@ -23,11 +23,11 @@ server.addListener('upgrade', function (request, rawsocket, head) {
 
     host = socket
 
-    messages.push(JSON.stringify({ clear:true }))
+    //messages.push(JSON.stringify({ clear:true }))
 
-    clients.forEach(function (socket) {
-      socket.send(messages[0])
-    })
+//    clients.forEach(function (socket) {
+//      socket.send(messages[0])
+//    })
 
     socket.onmessage = function (event) {
       var data = JSON.parse(event.data)
@@ -63,7 +63,7 @@ server.addListener('upgrade', function (request, rawsocket, head) {
   if (request.url == '/output') {
     clients.push(socket)
 
-    console.log('Client connected (' + clients.length + ' clients, ' + messages.length + ' messages now)')
+    console.log('client connected (' + clients.length + ' clients, ' + messages.length + ' messages now)')
 
     socket.send(JSON.stringify(messages))
 

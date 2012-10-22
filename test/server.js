@@ -96,7 +96,7 @@ service = server.listen(port, function (request, response) {
         }
         page.open(request.post.url, function(status) {
           if (status !== 'success') {
-            socketSend({'err': 'Failed to load ' + request.post.url + ', phantomjs status: ' + status})
+            socketSend({'err': 'failed to load ' + request.post.url + ', phantomjs status: ' + status})
             return
           }
           console.log(request.post.url + ' succesfully opened')

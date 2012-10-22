@@ -1,8 +1,11 @@
+/*jshint asi: true, eqeqeq: false, sub: true, devel: true */
+/*global TreeMirror */
 (function(w, d, undefined) {
 
   var MASTER = !w.SLAVE,
       $urlForm = d.getElementById('urlForm'),
       $awesomebar = d.getElementById('awesomebar'),
+      socketURL = 'ws://localhost:8081/output',
       iFrameDocument, treeMirrorParams, base, mirror, socket
 
   treeMirrorParams = {
@@ -10,14 +13,14 @@
       var node
 
       if (tagName == 'SCRIPT') {
-        node = d.createElement('NO-SCRIPT');
-        node.style.display = 'none';
-        return node;
+        node = d.createElement('NO-SCRIPT')
+        node.style.display = 'none'
+        return node
       }
 
       if (tagName == 'HEAD') {
-        node = d.createElement('HEAD');
-        node.appendChild(d.createElement('BASE'));
+        node = d.createElement('HEAD')
+        node.appendChild(d.createElement('BASE'))
         node.firstChild.href = base;
         return node;
       }
@@ -26,12 +29,13 @@
   }
 
   function handleMessage(msg) {
-    if (msg.clear) {
-      clearPage()
-    } else if (msg.base) {
+    if (msg.base) {
       base = msg.base
     } else if (msg.err) {
-      alert(msg.err)
+      iFrameDocument.getElementById('loading').style.display = 'none'
+      iFrameDocument.getElementById('error').innerHTML = msg.err
+      iFrameDocument.getElementById('error').style.display = 'block'
+      //alert(msg.err)
     } else if (msg.url) {
       $awesomebar.value = msg.url
       // trigger treemirror's method; in our example only 'initialize' can be triggered,
@@ -40,6 +44,8 @@
       clearPage()
       mirror = new TreeMirror(iFrameDocument, treeMirrorParams)
       mirror.initialize.apply(mirror, msg.args)
+    } else if (msg.clear) {
+      clearPage()
     } else {
       console.log('junk message: ', msg)
     }
@@ -68,7 +74,7 @@
     }
 
     if (!socket) {
-      socket = new WebSocket('ws://localhost:8081/output')
+      socket = new WebSocket(socketURL)
 
       socket.onmessage = function(event) {
         var msg = JSON.parse(event.data)
@@ -83,7 +89,7 @@
       }
 
       socket.onclose = function() {
-        socket = new WebSocket(receiverURL)
+        socket = new WebSocket(socketURL)
       }
     }
 
