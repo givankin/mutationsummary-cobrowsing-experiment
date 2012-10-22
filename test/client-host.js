@@ -1,18 +1,23 @@
 (function(w, d, undefined) {
 
-  var instantiated = false
+  var MASTER = !w.SLAVE,
+      $urlForm = d.getElementById('urlForm'),
+      $awesomebar = d.getElementById('awesomebar')
 
   // called from iframe when loaded (contentTpl)
   w.onIframeLoaded = function() {
 
-    if (instantiated) {
-      //return
-    }
 
     var iFrameDocument = w.frames['content'].document
     var base;
 
-    instantiated = true
+    iFrameDocument.onclick = function(e) {
+      e.preventDefault()
+      if (e.target.href && MASTER) {
+        $awesomebar.value = e.target.href
+        $urlForm.submit()
+      }
+    }
 
     var mirror = new TreeMirror(iFrameDocument, {
       createElement: function(tagName) {
@@ -28,7 +33,24 @@
           node.firstChild.href = base;
           return node;
         }
+
+        // add onclick handler for links
+//        if (tagName == 'A') {
+//          var node = iFrameDocument.createElement('A')
+//          node.onclick = function() {
+//            console.log('GOTO: ', this.href)
+//            return false
+//          }
+//        }
+
       }
+      // prevent our onclick from being overriden
+//      setAttribute: function(node, attrName, attrValue) {
+//        if (node.nodeName == 'A' && attrName == 'onclick') {
+//          console.log('preventing override ', node, attrName, attrValue)
+//          return false
+//        }
+//      }
     });
 
     var socket = new WebSocket('ws://localhost:8081/output')
@@ -41,7 +63,7 @@
       } else if (msg.err) {
         alert(msg.err)
       } else if (msg.url) {
-        d.getElementById('awesomebar').value = msg.url
+        $awesomebar.value = msg.url
       } else if (msg.f && mirror[msg.f]) {
         mirror[msg.f].apply(mirror, msg.args)
       } else {

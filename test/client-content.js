@@ -16,11 +16,11 @@ var serverURL = 'ws://localhost:8081/input';
 
 var socket;
 
-console.log('adding load listener')
 function socketSend(msg) {
   socket.send(JSON.stringify(msg));
 }
 
+console.log('adding load listener')
 window.addEventListener('load', function() {
   console.log('load event fired')
   startMirroring();
