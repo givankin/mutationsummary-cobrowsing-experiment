@@ -36,6 +36,7 @@ function startMirroring() {
 
   // ! socket points to <server>/projector
   socket.onopen = function() {
+    socketSend({ url: location.href });
     socketSend({ base: location.href.match(/^(.*\/)[^\/]*$/)[1] });
     mirrorClient = new TreeMirrorClient(document, {
       // called back with root el's id and all dom tree

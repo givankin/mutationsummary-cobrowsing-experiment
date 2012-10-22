@@ -40,6 +40,8 @@
         base = msg.base
       } else if (msg.err) {
         alert(msg.err)
+      } else if (msg.url) {
+        d.getElementById('awesomebar').value = msg.url
       } else if (msg.f && mirror[msg.f]) {
         mirror[msg.f].apply(mirror, msg.args)
       } else {
