@@ -85,16 +85,18 @@ service = server.listen(port, function (request, response) {
         page.onConsoleMessage = function(msg, lineNum, sourceId) {
           console.log("CONSOLE: " + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
         };
+        // inject scripts in page.onInitialized instead of page.open
+        // so we don't bind to window.onload after the window has already loaded
         page.onInitialized = function() {
           console.log(request.post.url + ' succesfully initialized, injecting scripts')
-          var inject1 = page.injectJs('node_map.js')
-          var inject2 = page.injectJs('tree_mirror.js')
-          var inject3 = page.injectJs('client-content.js')
+          var inject1 = page.injectJs('node_map.js'),
+              inject2 = page.injectJs('tree_mirror.js'),
+              inject3 = page.injectJs('client-content.js')
           console.log('scripts injected: ', inject1, inject2, inject3)
         }
         page.open(request.post.url, function(status) {
           if (status !== 'success') {
-            socketSend({'err': status})
+            socketSend({'err': 'Failed to load ' + request.post.url + ', phantomjs status: ' + status})
             return
           }
           console.log(request.post.url + ' succesfully opened')

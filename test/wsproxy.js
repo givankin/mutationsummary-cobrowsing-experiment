@@ -4,13 +4,14 @@ var WebSocket = require('faye-websocket'),
   server = http.createServer(),
   messages = [],
   clients = [],
+  hasErr = false,
   host
 
 // listening to socket
 server.addListener('upgrade', function (request, rawsocket, head) {
   var socket = new WebSocket(request, rawsocket, head)
 
-  // input
+  // input (messages that come from PhantomJS)
   if (request.url == '/input') {
     console.log('input connection initiating')
 
@@ -29,13 +30,19 @@ server.addListener('upgrade', function (request, rawsocket, head) {
     })
 
     socket.onmessage = function (event) {
-      console.log('message received, sending ' + messages.length +
-        ' messages to ' + clients.length + ' clients');
+      var data = JSON.parse(event.data)
+
+      console.log('message received, sending ' + messages.length + ' messages to ' + clients.length + ' clients');
+
+      // send to current clients
       clients.forEach(function (client) {
         client.send(event.data)
       });
 
-      messages.push(event.data)
+      // keep for future clients unless it's an error
+      if (!data.err) {
+        messages.push(event.data)
+      }
     };
 
     socket.onclose = function () {
@@ -52,11 +59,11 @@ server.addListener('upgrade', function (request, rawsocket, head) {
     return
   }
 
-  // output
+  // output (messages that go to client browsers)
   if (request.url == '/output') {
     clients.push(socket)
 
-    console.log('Client connected (' + clients.length + ' clients, ' + messages.length + ' messages now')
+    console.log('Client connected (' + clients.length + ' clients, ' + messages.length + ' messages now)')
 
     socket.send(JSON.stringify(messages))
 

@@ -34,29 +34,13 @@
           return node;
         }
 
-        // add onclick handler for links
-//        if (tagName == 'A') {
-//          var node = iFrameDocument.createElement('A')
-//          node.onclick = function() {
-//            console.log('GOTO: ', this.href)
-//            return false
-//          }
-//        }
-
       }
-      // prevent our onclick from being overriden
-//      setAttribute: function(node, attrName, attrValue) {
-//        if (node.nodeName == 'A' && attrName == 'onclick') {
-//          console.log('preventing override ', node, attrName, attrValue)
-//          return false
-//        }
-//      }
     });
 
     var socket = new WebSocket('ws://localhost:8081/output')
 
     function handleMessage(msg) {
-      if ( msg.clear) {
+      if (msg.clear) {
         clearPage()
       } else if (msg.base) {
         base = msg.base
@@ -64,7 +48,11 @@
         alert(msg.err)
       } else if (msg.url) {
         $awesomebar.value = msg.url
+      // trigger treemirror's method
+      // in our example only 'initialize' can be triggered,
+      // so it's pretty safe to clearPage() here
       } else if (msg.f && mirror[msg.f]) {
+        clearPage()
         mirror[msg.f].apply(mirror, msg.args)
       } else {
         console.log('junk message: ', msg)

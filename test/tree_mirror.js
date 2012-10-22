@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modified by abbakym to:
+// 1. Remove dependency from MutationSummary (use raw NodeMap instead)
+// 2. Allow root element to be iframe
+
 function TreeMirror(root, delegate) {
   this.root = root;
   this.idMap = {};
@@ -25,7 +29,7 @@ TreeMirror.prototype = {
     for (var i = 0; i < children.length; i++)
       this.deserializeNode(children[i], this.root);
 
-    console.log('treemirror root:', this.root)
+//    console.log('treemirror root:', this.root)
   },
 
   deserializeNode: function(nodeData, parent) {
