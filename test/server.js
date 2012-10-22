@@ -73,16 +73,19 @@ service = server.listen(port, function (request, response) {
         page.onConsoleMessage = function(msg, lineNum, sourceId) {
           console.log("CONSOLE: " + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
         };
+        page.onInitialized = function() {
+          console.log(request.post.url + ' succesfully initialized, injecting scripts')
+          var inject1 = page.injectJs('node_map.js')
+          var inject2 = page.injectJs('tree_mirror.js')
+          var inject3 = page.injectJs('client-content.js')
+          console.log('scripts injected: ', inject1, inject2, inject3)
+        }
         page.open(request.post.url, function(status) {
           if (status !== 'success') {
             socketSend({'err': status})
             return
           }
-          console.log(request.post.url + ' succesfully opened, injecting scripts')
-          var inject1 = page.injectJs('node_map.js')
-          var inject2 = page.injectJs('tree_mirror.js')
-          var inject3 = page.injectJs('client-content.js')
-          console.log('scripts injected: ', inject1, inject2, inject3)
+          console.log(request.post.url + ' succesfully opened')
         })
       } else {
         respond({
