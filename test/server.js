@@ -2,14 +2,14 @@ var system = require('system'),
   fs = require('fs'),
   page = require('webpage').create(),
   chromeTpl = fs.read('chromeTpl.html'),
+  chromeSlaveTpl = fs.read('chromeSlaveTpl.html'),
   contentTpl = fs.read('contentTpl.html'),
   port = 8080,
   server = require('webserver').create(),
+  masterInstantiated = false,
   service, socket
 
 socket = new WebSocket('ws://localhost:8081/input')
-
-console.log('The default user agent is ' + page.settings.userAgent);
 
 function socketSend(msg) {
   socket.send(JSON.stringify(msg))
@@ -21,12 +21,24 @@ socket.onopen = function() {
   })
 }
 
+function respondWith(o) {
+  this.statusCode = 200
+  this.headers = {
+    'Cache': 'no-cache',
+    'Content-Type': o.type || 'text/html'
+  }
+  this.write(o.content)
+  this.close()
+}
+
+
 service = server.listen(port, function (request, response) {
   var respond = function(o) {
-      respondWith.call(response, o)
-    }
+    respondWith.call(response, o)
+  }
 
-  console.log('\nREQUEST CAME:' + JSON.stringify(request))
+  console.log('\nREQUEST CAME:' + request.url)
+//  console.log('\nREQUEST CAME:' + JSON.stringify(request))
 
   if ((/\.js$/).test(request.url)) {
     respond({
@@ -46,10 +58,10 @@ service = server.listen(port, function (request, response) {
 
   if (request.url == '/favicon.ico') {
     return
-    respond({
-      type: 'image/x-icon',
-      content: fs.read('favicon.ico')
-    })
+//    respond({
+//      type: 'image/x-icon',
+//      content: fs.read('favicon.ico')
+//    })
   }
 
   if (request.url == '/content') {
@@ -96,8 +108,10 @@ service = server.listen(port, function (request, response) {
   }
 
   respond({
-    content: chromeTpl
+    content: masterInstantiated ? chromeSlaveTpl : chromeTpl
   })
+  masterInstantiated = true
+
 })
 
 if (service) {
@@ -105,16 +119,6 @@ if (service) {
 } else {
   console.log('Error: Could not create web server listening on port ' + port)
   phantom.exit()
-}
-
-function respondWith(o) {
-  this.statusCode = 200
-  this.headers = {
-    'Cache': 'no-cache',
-    'Content-Type': o.type || 'text/html'
-  }
-  this.write(o.content)
-  this.close()
 }
 
 
