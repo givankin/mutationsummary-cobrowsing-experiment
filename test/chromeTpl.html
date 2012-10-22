@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>simple experimental cobrowser</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/tree_mirror.js"></script>
+</head>
+<body>
+    <div id="chrome">
+        <form action="/content" target="content" method="post">
+            <input id="awesomebar" name="url" type="text" placeholder="Go to website" autofocus>
+        </form>
+    </div>
+    <div id="contentWrap">
+        <iframe id="content" name="content" src="/content" frameborder="0"></iframe>
+    </div>
+    <script src="/client-host.js"></script>
+</body>
+</html>
