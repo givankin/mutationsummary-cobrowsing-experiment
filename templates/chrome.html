@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>simple experimental cobrowser (slave)</title>
+    <meta charset="utf-8">
+    <title>simple experimental cobrowser{{? !it.master}} (slave){{?}}</title>
     <link rel="stylesheet" href="/styles.css">
     <script src="/tree_mirror.js"></script>
     <script>
+    {{? it.master}}
+        // "master" window has active url bar and links
+        window.MASTER = true
+    {{??}}
         // "slave" windows act as mirrors: url bar is disabled,
         // clicking on links doesn't do anything
         window.SLAVE = true
+    {{?}}
     </script>
+
 </head>
 <body>
     <div id="chrome">
-        <form action="/content" target="content" method="post">
-            <input id="awesomebar" name="url" type="text" disabled>
+        <form action="/content" target="content" method="post" id="urlForm">
+            <input id="awesomebar" name="url" type="text"
+                   {{? it.master}}placeholder="Go to website" autofocus{{??}}disabled{{?}}>
         </form>
     </div>
     <div id="contentWrap">

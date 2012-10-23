@@ -2,8 +2,7 @@
 /*global TreeMirror */
 (function(w, d, undefined) {
 
-  var MASTER = !w.SLAVE,
-      $urlForm = d.getElementById('urlForm'),
+  var $urlForm = d.getElementById('urlForm'),
       $awesomebar = d.getElementById('awesomebar'),
       socketURL = 'ws://localhost:8081/output',
       iFrameDocument, treeMirrorParams, base, mirror, socket
@@ -66,7 +65,7 @@
     }
   }
 
-  // called from iframe when loaded (see contentTpl)
+  // called from iframe when loaded (see content template)
   w.onIframeLoaded = function() {
 
     iFrameDocument = w.frames['content'].document
@@ -77,7 +76,7 @@
       // "slave" mirrors can't navigate
       e.preventDefault()
       // only "master" can
-      if (e.target.href && MASTER) {
+      if (e.target.href && w.MASTER) {
         $awesomebar.value = e.target.href
         $urlForm.submit()
       }

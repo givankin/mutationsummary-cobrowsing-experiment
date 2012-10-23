@@ -2,14 +2,20 @@
 /*global phantom */
 var system = require('system'),
   fs = require('fs'),
+  doT = require('dot'),
   page = require('webpage').create(),
-  chromeTpl = fs.read('chromeTpl.html'),
-  chromeSlaveTpl = fs.read('chromeSlaveTpl.html'),
-  contentTpl = fs.read('contentTpl.html'),
+  chromeHtml = fs.read('templates/chrome.html'),
+  contentHtml = fs.read('templates/content.html'),
   port = 8080,
   server = require('webserver').create(),
   masterInstantiated = false,
-  service, socket
+  chromeTpl, service, socket
+
+// dont strip whitespace from templates for better Ctrl+U experience
+doT.templateSettings.strip = false
+
+// use doT for simple templating (chrome instances can be "masters" or "slaves")
+chromeTpl = doT.template(chromeHtml)
 
 // PhantomJS's server isn't powerful enough to support WebSockets
 // or even Server-Sent Events, but as a real webkit it has
@@ -86,7 +92,7 @@ service = server.listen(port, function (request, response) {
       pageURL = request.post.url
 
       respond({
-        content: contentTpl
+        content: contentHtml
       })
 
       console.log('\nopening page: ', pageURL)
@@ -129,7 +135,7 @@ service = server.listen(port, function (request, response) {
 
     } else {
       respond({
-        content: contentTpl
+        content: contentHtml
       })
     }
 
@@ -138,7 +144,9 @@ service = server.listen(port, function (request, response) {
 
   // else just give away the browser chrome (master first, slaves second)
   respond({
-    content: masterInstantiated ? chromeSlaveTpl : chromeTpl
+    content: chromeTpl({
+      master: !masterInstantiated
+    })
   })
   masterInstantiated = true
 
