@@ -1,4 +1,4 @@
-/*jshint asi:true, node: true*/
+/*jshint asi: true, node: true*/
 var WebSocket = require('faye-websocket'),
   http = require('http'),
   fs = require('fs'),
@@ -23,12 +23,6 @@ server.addListener('upgrade', function (request, rawsocket, head) {
 
     host = socket
 
-    //messages.push(JSON.stringify({ clear:true }))
-
-//    clients.forEach(function (socket) {
-//      socket.send(messages[0])
-//    })
-
     socket.onmessage = function (event) {
       var data = JSON.parse(event.data)
 
@@ -51,11 +45,11 @@ server.addListener('upgrade', function (request, rawsocket, head) {
       clients.forEach(function (socket) {
         socket.send(JSON.stringify({ clear:true }))
       })
-
       host = undefined
     }
 
     console.log('host (input) socket successfully initialized')
+
     return
   }
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Modified by abbakym to:
-// 1. Remove dependency from MutationSummary (use raw NodeMap instead)
+// 1. Remove dependency from MutationSummary (use only extracted NodeMap instead)
 // 2. Allow root element to be iframe
 
 function TreeMirror(root, delegate) {

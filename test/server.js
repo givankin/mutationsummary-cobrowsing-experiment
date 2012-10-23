@@ -1,3 +1,5 @@
+/*jshint asi: true, node: true, browser: true */
+/*global phantom */
 var system = require('system'),
   fs = require('fs'),
   page = require('webpage').create(),
@@ -9,17 +11,22 @@ var system = require('system'),
   masterInstantiated = false,
   service, socket
 
+// PhantomJS's server isn't powerful enough to support WebSockets
+// or even Server-Sent Events, but as a real webkit it has
+// WebSockets client support which we will use to communicate
+// with node proxy server
 socket = new WebSocket('ws://localhost:8081/input')
 
 function socketSend(msg) {
   socket.send(JSON.stringify(msg))
 }
 
-socket.onopen = function() {
-  socketSend({
-    'i am a message': 'from outta space'
-  })
-}
+// test websockets
+//socket.onopen = function() {
+//  socketSend({
+//    'i am a message': 'from outta space'
+//  })
+//}
 
 function respondWith(o) {
   this.statusCode = 200
@@ -33,30 +40,35 @@ function respondWith(o) {
 
 
 service = server.listen(port, function (request, response) {
-  var respond = function(o) {
+  var requestURL = request.url,
+      pageURL
+
+  function respond(o) {
     respondWith.call(response, o)
   }
 
-  console.log('\nREQUEST CAME:' + request.url)
+  console.log('\nREQUEST CAME:' + requestURL)
 //  console.log('\nREQUEST CAME:' + JSON.stringify(request))
 
-  if ((/\.js$/).test(request.url)) {
+  // handle static files
+
+  if ((/\.js$/).test(requestURL)) {
     respond({
       type: 'application/x-javascript',
-      content: fs.read(request.url.replace('/', ''))
+      content: fs.read(requestURL.replace('/', ''))
     })
     return
   }
 
-  if ((/\.css$/).test(request.url)) {
+  if ((/\.css$/).test(requestURL)) {
     respond({
       type: 'text/css',
-      content: fs.read(request.url.replace('/', ''))
+      content: fs.read(requestURL.replace('/', ''))
     })
     return
   }
 
-  if (request.url == '/favicon.ico') {
+  if (requestURL == '/favicon.ico') {
     return
 //    respond({
 //      type: 'image/x-icon',
@@ -64,51 +76,67 @@ service = server.listen(port, function (request, response) {
 //    })
   }
 
-  if (request.url == '/content') {
-    console.log('\n/content request came')
-      // let the interesting part begin
-      if (request.post && request.post.url) {
-        respond({
-          content: contentTpl
-        })
-        console.log('\nopening page: ', request.post.url)
-        page.onError = function(msg, trace) {
-          var msgStack = ["ERROR: " + msg];
-          if (trace) {
-            msgStack.push("TRACE:");
-            trace.forEach(function(t) {
-              msgStack.push(" -> " + t.file + ": " + t.line + (t.function ? " (in function '" + t.function + "')" : ""));
-            });
-          }
-          console.error(msgStack.join("\n"));
-        };
-        page.onConsoleMessage = function(msg, lineNum, sourceId) {
-          console.log("CONSOLE: " + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
-        };
-        // inject scripts in page.onInitialized instead of page.open
-        // so we don't bind to window.onload after the window has already loaded
-        page.onInitialized = function() {
-          console.log(request.post.url + ' succesfully initialized, injecting scripts')
-          var inject1 = page.injectJs('node_map.js'),
-              inject2 = page.injectJs('tree_mirror.js'),
-              inject3 = page.injectJs('client-content.js')
-          console.log('scripts injected: ', inject1, inject2, inject3)
+
+  // iframe part, which will act as our browser's content window
+  if (requestURL == '/content') {
+
+    // let the interesting part begin
+    if (request.post && request.post.url) {
+
+      pageURL = request.post.url
+
+      respond({
+        content: contentTpl
+      })
+
+      console.log('\nopening page: ', pageURL)
+
+      // trace js errors (taken from on of PhantomJS examples)
+      page.onError = function(msg, trace) {
+        var msgStack = ["ERROR: " + msg];
+        if (trace) {
+          msgStack.push("TRACE:");
+          trace.forEach(function(t) {
+            msgStack.push(" -> " + t.file + ": " + t.line + (t['function'] ? " (in function '" + t['function'] + "')" : ""));
+          });
         }
-        page.open(request.post.url, function(status) {
-          if (status !== 'success') {
-            socketSend({'err': 'failed to load ' + request.post.url + ', phantomjs status: ' + status})
-            return
-          }
-          console.log(request.post.url + ' succesfully opened')
-        })
-      } else {
-        respond({
-          content: contentTpl
-        })
+        console.error(msgStack.join("\n"));
       }
+
+      // forward console messages
+      page.onConsoleMessage = function(msg, lineNum, sourceId) {
+        console.log("CONSOLE: " + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
+      }
+
+      // inject scripts in page.onInitialized instead of page.open
+      // so we don't bind to window.onload after the window has already loaded
+      page.onInitialized = function() {
+        console.log(pageURL + ' succesfully initialized, injecting scripts')
+        var inject1 = page.injectJs('node_map.js'),
+            inject2 = page.injectJs('tree_mirror.js'),
+            inject3 = page.injectJs('client-content.js')
+        console.log('scripts injected: ', inject1, inject2, inject3)
+      }
+
+      // go
+      page.open(pageURL, function(status) {
+        if (status !== 'success') {
+          socketSend({'err': 'failed to load ' + pageURL + ', phantomjs status: ' + status})
+          return
+        }
+        console.log(pageURL + ' succesfully opened')
+      })
+
+    } else {
+      respond({
+        content: contentTpl
+      })
+    }
+
     return
   }
 
+  // else just give away the browser chrome (master first, slaves second)
   respond({
     content: masterInstantiated ? chromeSlaveTpl : chromeTpl
   })

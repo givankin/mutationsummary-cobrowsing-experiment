@@ -1,8 +1,9 @@
+/*jshint forin: false */
 (function(global) {
 
   function NodeMap() {
     this.map_ = {};
-  };
+  }
 
   var ID_PROP = '__mutation_summary_node_map_id__';
   var nextId_ = 1;
@@ -22,18 +23,21 @@
       this.map_[node[ID_PROP]] = {k: node, v: value};
     },
     get: function(node) {
-      if (ensureId(node))
+      if (ensureId(node)) {
         return;
+      }
       var byId = this.map_[node[ID_PROP]];
-      if (byId)
+      if (byId) {
         return byId.v;
+      }
     },
     has: function(node) {
       return !ensureId(node) && node[ID_PROP] in this.map_;
     },
     'delete': function(node) {
-      if (ensureId(node))
+      if (ensureId(node)) {
         return;
+      }
       delete this.map_[node[ID_PROP]];
     },
     keys: function() {
@@ -45,6 +49,6 @@
     }
   };
 
-  global.NodeMap = NodeMap
+  global.NodeMap = NodeMap;
 
-})(this)
+})(this);

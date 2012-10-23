@@ -1,4 +1,4 @@
-/*jshint asi: true, eqeqeq: false, sub: true, devel: true */
+/*jshint asi: true, eqeqeq: false, sub: true, devel: true, browser: true */
 /*global TreeMirror */
 (function(w, d, undefined) {
 
@@ -31,32 +31,38 @@
   function handleMessage(msg) {
     if (msg.base) {
       base = msg.base
+
     } else if (msg.err) {
       iFrameDocument.getElementById('loading').style.display = 'none'
       iFrameDocument.getElementById('error').innerHTML = msg.err
       iFrameDocument.getElementById('error').style.display = 'block'
-      //alert(msg.err)
+
     } else if (msg.url) {
       $awesomebar.value = msg.url
-      // trigger treemirror's method; in our example only 'initialize' can be triggered,
-      // so it's reasonable to clearPage() and (re-)instantiate the mirror here
+
+    // trigger treemirror's method; in our example only 'initialize' can be triggered,
+    // so it's reasonable to clearPage() and (re-)instantiate the mirror here
     } else if (msg.f && msg.f == 'initialize') {
       clearPage()
       mirror = new TreeMirror(iFrameDocument, treeMirrorParams)
       mirror.initialize.apply(mirror, msg.args)
+
+    // called when remote socket is closed
     } else if (msg.clear) {
       clearPage()
+
+    // for debugging
     } else {
-      console.log('junk message: ', msg)
+      console.log('just message: ', msg)
     }
+
   }
 
   function clearPage() {
-    if (!iFrameDocument) {
-      return
-    }
-    while (iFrameDocument.firstChild) {
-      iFrameDocument.removeChild(iFrameDocument.firstChild)
+    if (iFrameDocument) {
+      while (iFrameDocument.firstChild) {
+        iFrameDocument.removeChild(iFrameDocument.firstChild)
+      }
     }
   }
 
@@ -65,8 +71,12 @@
 
     iFrameDocument = w.frames['content'].document
 
+    // Override behavior for links: instead of reloading an iframe,
+    // use them via our "browser" so that mirrors stay in sync.
     iFrameDocument.onclick = function(e) {
+      // "slave" mirrors can't navigate
       e.preventDefault()
+      // only "master" can
       if (e.target.href && MASTER) {
         $awesomebar.value = e.target.href
         $urlForm.submit()
@@ -82,7 +92,7 @@
         if (msg instanceof Array) {
           msg.forEach(function(subMessage) {
             handleMessage(JSON.parse(subMessage))
-          });
+          })
         } else {
           handleMessage(msg)
         }
