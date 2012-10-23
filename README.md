@@ -28,7 +28,7 @@ After that, start the proxy server which will handle WebSockets connection betwe
 
     node wsproxy.js
 
-If it tells you "Server listening on 8081", start the phantom server
+If it tells you "Server listening on 8081", in another console instance start the phantom server
 
     phantomjs server.js
 
