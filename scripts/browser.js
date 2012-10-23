@@ -31,6 +31,13 @@
         return node;
       }
 
+    },
+    setAttribute: function(node, attr, val) {
+      // remove anchors's onclick dom0-style handlers so they
+      // don't mess with our click handler and don't produce errors
+      if (node.nodeName == 'A' && attr == 'onclick') {
+        return true
+      }
     }
   }
 
