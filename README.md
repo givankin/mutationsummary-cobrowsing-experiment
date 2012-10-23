@@ -32,11 +32,11 @@ If it tells you "Server listening on 8081", start the phantom server
 
     phantomjs server.js
 
-If it says "Web server running on port 8080", go to [http://localhost:8080](http://localhost:8080)
+If it says "Web server running on port 8080", go to http://localhost:8080
 
 Enter the url in the address bar (don't omit the http:// part!) and wait a little.
 
-If the page opens successfully, open [http://localhost:8080](http://localhost:8080) in another browser instance: you should see the "mirror" of the loaded page.
+If the page opens successfully, open http://localhost:8080 in another browser instance: you should see the "mirror" of the loaded page.
 
 Note that first opened instance acts as a "master": you can enter urls in the address bar and click on links in the opened page. All subsequent instances are mere slaves: address bar is disabled and they just mirror what happens in the "master".
 
