@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modified by abbakym to:
+// 1. Remove dependency from MutationSummary (use only extracted NodeMap instead)
+// 2. Allow root element to be iframe
+
 function TreeMirror(root, delegate) {
   this.root = root;
   this.idMap = {};
@@ -24,6 +28,8 @@ TreeMirror.prototype = {
 
     for (var i = 0; i < children.length; i++)
       this.deserializeNode(children[i], this.root);
+
+//    console.log('treemirror root:', this.root)
   },
 
   deserializeNode: function(nodeData, parent) {
@@ -33,7 +39,7 @@ TreeMirror.prototype = {
     if (typeof nodeData == 'number')
       return this.idMap[nodeData];
 
-    var doc = this.root instanceof HTMLDocument ? this.root : this.root.ownerDocument;
+    var doc = this.root //instanceof HTMLDocument ? this.root : this.root.ownerDocument;
 
     var node;
     switch(nodeData.nodeType) {
@@ -140,7 +146,7 @@ TreeMirror.prototype = {
 function TreeMirrorClient(target, mirror, testingQueries) {
   this.target = target;
   this.mirror = mirror;
-  this.knownNodes = new MutationSummary.NodeMap;
+  this.knownNodes = new NodeMap;
 
   var rootId = this.serializeNode(target).id;
   var children = [];
@@ -156,13 +162,13 @@ function TreeMirrorClient(target, mirror, testingQueries) {
   if (testingQueries)
     queries = queries.concat(testingQueries);
 
-  this.mutationSummary = new MutationSummary({
+  /*this.mutationSummary = new MutationSummary({
     rootNode: target,
     callback: function(summaries) {
       self.applyChanged(summaries);
     },
     queries: queries
-  });
+  });*/
 }
 
 TreeMirrorClient.prototype = {
@@ -234,12 +240,12 @@ TreeMirrorClient.prototype = {
   serializeAddedAndMoved: function(changed) {
     var all = changed.added.concat(changed.reparented).concat(changed.reordered);
 
-    var parentMap = new MutationSummary.NodeMap;
+    var parentMap = new NodeMap;
     all.forEach(function(node) {
       var parent = node.parentNode;
       var children = parentMap.get(parent)
       if (!children) {
-        children = new MutationSummary.NodeMap;
+        children = new NodeMap;
         parentMap.set(parent, children);
       }
 
@@ -276,7 +282,7 @@ TreeMirrorClient.prototype = {
   },
 
   serializeAttributeChanges: function(attributeChanged) {
-    var map = new MutationSummary.NodeMap;
+    var map = new NodeMap;
 
     Object.keys(attributeChanged).forEach(function(attrName) {
       attributeChanged[attrName].forEach(function(element) {

@@ -24,7 +24,7 @@
 
   var MutationObserver = global.MutationObserver || global.WebKitMutationObserver || global.MozMutationObserver;
   if (typeof MutationObserver != 'function') {
-    return;
+    throw 'Mutation Observer is unsupported'
   }
 
   // NodeMap UtilityClass. Exposed as MutationSummary.NodeMap.
