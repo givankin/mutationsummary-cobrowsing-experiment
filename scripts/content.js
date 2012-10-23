@@ -1,5 +1,10 @@
 /*jshint asi: true, browser: true, devel: true */
 /*global TreeMirrorClient*/
+
+// This script is injected by PhantomJS in every loaded page.
+// Basically it just opens a socket and sends the whole DOM tree there.
+// Additionally sends real page url so our browser clients can show it.
+
 // Based on MutationSummary screensharing extension's content_script.js
 
 (function() {

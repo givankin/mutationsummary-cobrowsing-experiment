@@ -76,10 +76,6 @@ service = server.listen(port, function (request, response) {
 
   if (requestURL == '/favicon.ico') {
     return
-//    respond({
-//      type: 'image/x-icon',
-//      content: fs.read('favicon.ico')
-//    })
   }
 
 
@@ -118,9 +114,9 @@ service = server.listen(port, function (request, response) {
       // so we don't bind to window.onload after the window has already loaded
       page.onInitialized = function() {
         console.log(pageURL + ' succesfully initialized, injecting scripts')
-        var inject1 = page.injectJs('node_map.js'),
-            inject2 = page.injectJs('tree_mirror.js'),
-            inject3 = page.injectJs('client-content.js')
+        var inject1 = page.injectJs('scripts/libs/node_map.js'),
+            inject2 = page.injectJs('scripts/libs/tree_mirror.js'),
+            inject3 = page.injectJs('scripts/content.js')
         console.log('scripts injected: ', inject1, inject2, inject3)
       }
 

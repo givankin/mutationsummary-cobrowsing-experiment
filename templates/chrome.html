@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>simple experimental cobrowser{{? !it.master}} (slave){{?}}</title>
-    <link rel="stylesheet" href="/styles.css">
-    <script src="/tree_mirror.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/scripts/libs/tree_mirror.js"></script>
     <script>
     {{? it.master}}
         // "master" window has active url bar and links
@@ -27,6 +27,6 @@
     <div id="contentWrap">
         <iframe id="content" name="content" src="" frameborder="0"></iframe>
     </div>
-    <script src="/client-host.js"></script>
+    <script src="/scripts/browser.js"></script>
 </body>
 </html>

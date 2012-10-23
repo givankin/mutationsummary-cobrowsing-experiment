@@ -1,5 +1,12 @@
 /*jshint asi: true, eqeqeq: false, sub: true, devel: true, browser: true */
 /*global TreeMirror */
+
+// Our simple browser client works like this:
+// * Opens a websocket to our proxy node server
+// * When the server sends a DOM tree, recreates it in iframe
+// * Overrides all links in the new tree to react to them
+// * Also can handle errors (nothing special, just say if things go wrong)
+
 (function(w, d, undefined) {
 
   var $urlForm = d.getElementById('urlForm'),
